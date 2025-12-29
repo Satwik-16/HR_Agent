@@ -107,7 +107,7 @@ You'll need **Python 3.10+** and the **Google Cloud SDK** installed.
 ```bash
 # Clone and enter the repo
 git clone <repo-url>
-cd Alation
+cd HR_Agent
 
 # Create and activate virtual environment
 python3 -m venv venv
@@ -121,7 +121,7 @@ pip install -r requirements.txt
 ```powershell
 # Clone and enter the repo
 git clone <repo-url>
-cd Alation
+cd HR_Agent
 
 # Create and activate virtual environment
 python -m venv venv
