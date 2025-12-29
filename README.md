@@ -3,7 +3,7 @@
 This project is an end-to-end data engineering and analytics solution I built to make HR data accessible through natural language.
 
 The goal was to solve a common problem: accessing insights from employee data usually requires writing complex SQL queries or asking a data analyst. I wanted to build a system where anyone could just ask, *"Who are the top performers in Sales?"* and get an immediate, accurate answer.
-# HR Intelligence Agent (Verified Architecture)
+# HR  Agent 
 
 ## Project Overview
 This project acts as an autonomous SQL Agent designed to answer queries about employee data with 100% precision. It features a "Double-Check" architecture where a primary Agent generates answers from a secure SQLite database, and a secondary "QA Critic" validates those answers before they are displayed.
