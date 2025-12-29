@@ -1,0 +1,21 @@
+# Environment Variables (CRITICAL)
+.env
+
+# Virtual Environment
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Mac OS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Artifacts
+data/processed/

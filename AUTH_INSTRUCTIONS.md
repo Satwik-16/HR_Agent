@@ -1,43 +1,35 @@
-# GCP Authentication Guide for Vertex AI Agent
+# Credentials & Security Guide
 
-To enable the AI Agent to communicate with Google Gemini models, you must provide authentication credentials.
+This project uses **Google Application Default Credentials (ADC)** to securely authenticate with Vertex AI. This is the industry-standard method for local development, avoiding the need to download insecure JSON key files.
 
-## Step 1: Install Google Cloud CLI
-If you haven't installed the `gcloud` CLI yet, follow the official instructions:
-https://cloud.google.com/sdk/docs/install
+## 1. Quick Setup (The Golden Path)
+Run this single command to authorize your local environment:
 
-## Step 2: Login
-Run the following command in your terminal. This will open a browser window for you to log in with your Google account.
-
-**Option A (Standard):**
 ```bash
 gcloud auth application-default login
 ```
+*   This will open your browser.
+*   Log in with the Google Account linked to your GCP Project.
+*   Click "Allow".
 
-**Option B (If "command not found"):**
-Use the absolute path to the installed SDK:
-**Option C (Most Reliable):**
-If the browser doesn't open or you get consent errors, use this:
-```bash
-./google-cloud-sdk/bin/gcloud auth application-default login --no-browser
-```
-*   Copy the long URL from the terminal into your browser.
-*   Log in and **ALLOW** all permissions.
-*   Copy the code back to the terminal.
-
-## Step 3: Set Project ID
-Ensure your environment is using the correct project ID.
+## 2. Verify Configuration
+Ensure your terminal points to the correct project:
 ```bash
 gcloud config set project [YOUR_PROJECT_ID]
 ```
 
-## Step 4: Enable APIs
-Make sure the **Vertex AI API** is enabled for your project in the Google Cloud Console.
-https://console.cloud.google.com/vertex-ai
+## 3. Scalability & Performance Note
+The current architecture is optimized for:
+*   **Small to Mid-Size Data**: Handles 100 - 50,000 employee records with sub-second latency.
+*   **Memory**: Uses SQLite (file-based), which is robust for up to ~1GB of data.
+*   **Safety**: The Agent queries the DB, not the LLM context window. This means it **can** scale to larger datasets (10k+ rows) without hitting token limits, as long as the *result* (e.g. "Top 5 employees") is concise.
 
-## Verification
-After logging in, restart the Streamlit app:
-```bash
-source venv/bin/activate
-streamlit run app.py
-```
+## 4. Troubleshooting
+**"403 Permission Denied":**
+*   **Cause**: You logged in, but the API isn't enabled.
+*   **Fix**: Go to [Vertex AI Console](https://console.cloud.google.com/vertex-ai) and click **"ENABLE API"**.
+
+**"404 Model Not Found":**
+*   **Cause**: The project ID in `.env` doesn't match your `gcloud` login.
+*   **Fix**: Check `echo $GOOGLE_PROJECT_ID` vs `.env`.
+

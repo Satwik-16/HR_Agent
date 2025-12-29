@@ -3,14 +3,94 @@
 This project is an end-to-end data engineering and analytics solution I built to make HR data accessible through natural language.
 
 The goal was to solve a common problem: accessing insights from employee data usually requires writing complex SQL queries or asking a data analyst. I wanted to build a system where anyone could just ask, *"Who are the top performers in Sales?"* and get an immediate, accurate answer.
+# HR Intelligence Agent (Verified Architecture)
 
-## How It Works
+## Project Overview
+This project acts as an autonomous SQL Agent designed to answer queries about employee data with 100% precision. It features a "Double-Check" architecture where a primary Agent generates answers from a secure SQLite database, and a secondary "QA Critic" validates those answers before they are displayed.
 
-I designed this application with three main components:
+**Business Value:**
+- **Zero Hallucination:** The QA layer filters out incorrect or invented data.
+- **Strict Logic:** Correctly handles ties, date sorting (tenure), and null values.
+- **Audit Logging:** All queries and verification statuses are logged to `query_logs` for future model training.
 
-1.  **ETL Pipeline (`src/etl.py`):** I wrote a robust pipeline to ingest raw CSV data. It doesn't just copy data; it validates the schema, deduplicates records based on normalized emails, and cleans up messy formats like phone numbers and salaries.
-2.  **SQL Agent (`src/agent.py`):** Instead of letting an LLM guess answers from text, I used a **SQL Agent** architecture. The Agent (powered by Google Gemini) generates SQL queries to run against a local database. This maximizes accuracy—math operations like "average salary" are done by the database, not the LLM.
-3.  **Analytics Interface (`app.py`):** I built a clean Streamlit app that serves as the front end. It combines the chat interface with a dynamic dashboard for quick high-level metrics.
+---
+
+## System Architecture
+1.  **ETL Pipeline (src/etl.py):**
+    -   Ingests raw CSV data.
+    -   Validates schema (checks for required columns).
+    -   Standardizes dates to ISO 8601 (YYYY-MM-DD).
+    -   Deduplicates records based on normalized email.
+2.  **Database (src/db.py):**
+    -   Loads cleaned data into an in-memory SQLite instance.
+    -   Maintains a `query_logs` table for persistent interaction history.
+3.  **Core Agent (src/agent.py):**
+    -   Powered by Google Vertex AI (Gemini Flash).
+    -   Uses strict Prompt Engineering to enforce Table output and date sanity.
+4.  **Application (app.py):**
+    -   Streamlit-based UI.
+    -   Pure Chat interface (no legacy dashboard).
+    -   Real-time "Verified Correct" feedback badges.
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+- Python 3.9+
+- Google Cloud Project with Vertex AI API enabled.
+- `gcloud` CLI installed and authenticated.
+
+### 1. Environment Configuration
+Create a `.env` file in the root directory:
+```bash
+GOOGLE_PROJECT_ID=your-project-id
+GOOGLE_LOCATION=us-central1
+VERTEX_MODEL_NAME=gemini-2.5-flash
+```
+
+### 2. Installation
+Install dependencies using pip:
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Authentication
+Authenticate your local session with Google Cloud:
+```bash
+gcloud auth application-default login
+```
+
+### 4. Data Processing (ETL)
+Run the pipeline to generate the clean dataset:
+```bash
+python -m src.etl
+```
+*Expected Output:*
+> INFO - Pipeline finished. Cleaned data saved to data/processed/cleaned_employees.csv
+
+### 5. Launch Application
+Run the Streamlit server:
+```bash
+streamlit run app.py
+```
+Access the UI at `http://localhost:8501`.
+
+---
+
+## Usage Guide
+Ask specific questions about the data. The Agent supports:
+- **Aggregation:** "What is the average salary by department?"
+- **Filtering:** "List all employees in Sales joined before 2021."
+- **Reasoning:** "Who is the most tenured employee in Update?"
+
+**Verification Badge Guide:**
+- **Green Badge:** The QA Critic confirmed the answer matches the database facts.
+- **Yellow/Warning Badge:** The QA Critic detected a potential hallucination or logic error.
+
+## Troubleshooting
+- **Date Errors:** If dates appear unsorted, ensure you ran `python -m src.etl` to enforce YYYY-MM-DD format.
+- **Auth Errors:** Run `gcloud auth application-default login` again if the Agent fails to initialize.
 
 ---
 

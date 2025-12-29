@@ -3,7 +3,8 @@ import re
 import pandas as pd
 import sys
 
-# Configure production-grade logging
+# Configure centralized logging with timestamp and severity level
+# This ensures all application events are traceable in production environments
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -12,7 +13,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def setup_logging():
-    """Returns the configured logger instance."""
+    """
+    Returns the configured global logger instance.
+    This pattern ensures a singleton logger across the application modules.
+    """
     return logger
 
 def format_phone_number(raw_phone):

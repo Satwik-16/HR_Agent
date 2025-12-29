@@ -22,8 +22,11 @@ def run_pipeline(input_path: str, output_path: str):
         df = pd.read_csv(input_path)
         logger.info(f"Loaded {len(df)} rows.")
         
-        # 1. Schema Validation
-        required_columns = ['Email', 'Phone', 'Department_Region', 'Salary']
+        # 1. Schema Validation (Strict Mode)
+        required_columns = [
+            'Email', 'Phone', 'Department_Region', 'Salary', 
+            'Join_Date', 'First_Name', 'Last_Name', 'Performance_Score'
+        ]
         check_schema(df, required_columns)
         
         # 2. Deduplication
@@ -35,12 +38,15 @@ def run_pipeline(input_path: str, output_path: str):
         logger.info(f"Dropped {initial_count - len(df)} duplicate rows. New count: {len(df)}")
         
         # 3. Data Cleaning
+        # Standardize formats to ensure consistent downstream analysis
         logger.info("Cleaning Phone numbers and Salaries...")
         df['Phone'] = df['Phone'].apply(format_phone_number)
         df['Salary'] = df['Salary'].apply(clean_salary).astype('Int64')
         
-        # 4. Transformations (Department_Region Split)
-        logger.info("Splitting Department_Region...")
+        # 4. Feature Engineering & Standardization
+        logger.info("Splitting Department_Region and Standardizing Dates...")
+        
+        # Split 'Department_Region' (e.g., "Sales-US") into separate columns for granular aggregations
         split_data = df['Department_Region'].astype(str).str.split('-', n=1, expand=True)
         df['Department'] = split_data[0].str.strip()
         if split_data.shape[1] > 1:
@@ -48,10 +54,17 @@ def run_pipeline(input_path: str, output_path: str):
         else:
             df['Region'] = pd.NA
             
-        # Drop original column if desired, or keep it. Review said "Remove the old column"
+        # CRITICAL: Standardization of Date Format
+        # Convert all dates to ISO 8601 (YYYY-MM-DD) to ensure correct chronological sorting in SQL.
+        # Without this, '10/01/2023' (String) would sort before '02/01/2020' (String).
+        if 'Join_Date' in df.columns:
+            df['Join_Date'] = pd.to_datetime(df['Join_Date'], errors='coerce').dt.strftime('%Y-%m-%d')
+            
+        # Remove redundant composite column after splitting
         df = df.drop(columns=['Department_Region'])
         
-        # 5. Save Output
+        # 5. Serialization
+        # Save processed data to a stable location for the Agent/DB loader
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         df.to_csv(output_path, index=False)
         logger.info(f"Pipeline finished. Cleaned data saved to {output_path}")
