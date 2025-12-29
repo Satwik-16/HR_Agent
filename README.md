@@ -29,7 +29,7 @@ This project acts as an autonomous SQL Agent designed to answer queries about em
     -   Uses strict Prompt Engineering to enforce Table output and date sanity.
 4.  **Application (app.py):**
     -   Streamlit-based UI.
-    -   Pure Chat interface (no legacy dashboard).
+    -   Pure Chat interface.
     -   Real-time "Verified Correct" feedback badges.
 
 ---
@@ -41,48 +41,19 @@ This project acts as an autonomous SQL Agent designed to answer queries about em
 - Google Cloud Project with Vertex AI API enabled.
 - `gcloud` CLI installed and authenticated.
 
-### 1. Environment Configuration
+### Environment Configuration
 Create a `.env` file in the root directory:
 ```bash
 GOOGLE_PROJECT_ID=your-project-id
 GOOGLE_LOCATION=us-central1
-VERTEX_MODEL_NAME=gemini-2.5-flash
 ```
-
-### 2. Installation
-Install dependencies using pip:
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Authentication
-Authenticate your local session with Google Cloud:
-```bash
-gcloud auth application-default login
-```
-
-### 4. Data Processing (ETL)
-Run the pipeline to generate the clean dataset:
-```bash
-python -m src.etl
-```
-*Expected Output:*
-> INFO - Pipeline finished. Cleaned data saved to data/processed/cleaned_employees.csv
-
-### 5. Launch Application
-Run the Streamlit server:
-```bash
-streamlit run app.py
-```
-Access the UI at `http://localhost:8501`.
-
 ---
 
 ## Usage Guide
 Ask specific questions about the data. The Agent supports:
 - **Aggregation:** "What is the average salary by department?"
 - **Filtering:** "List all employees in Sales joined before 2021."
-- **Reasoning:** "Who is the most tenured employee in Update?"
+- **Reasoning:** "Who is the most tenured employee in each department?"
 
 **Verification Badge Guide:**
 - **Green Badge:** The QA Critic confirmed the answer matches the database facts.
